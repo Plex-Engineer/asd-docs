@@ -1,0 +1,37 @@
+---
+title: Transactions
+description: "Generating Transactions For ASD"
+---
+
+This page will walk through the process of generating transactions to mint and burn asd.
+
+Mint
+
+- Data for amount of USDC/USDT to deposit for minting.
+- Destination Chain.
+- Slippage Params
+
+Burn
+
+- Burning ASD for USDC/USDT
+- Slippage Params
+
+## Usage
+
+<CodeGroup>
+
+```typescript Minting
+import { ASD } from "example-package";
+
+await ASD.mint({
+  amount: "example",
+  destinationChain: "example",
+  slippage: "example",
+});
+```
+
+```typescript Burning
+
+```
+
+</CodeGroup>

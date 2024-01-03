@@ -1,0 +1,21 @@
+---
+title: Tx Status
+description: Query Status of asD Transaction
+---
+
+This page will show you how to query the status of a transaction.
+
+Possible States:
+
+- StableCoin Deposited - Waiting to arrive on CANTO
+- StableCoin Arrived - swapping for NOTE
+- Note Deposited to ASD vault - Converting to ASD
+- ASD Minted - wwaiting to arrive on user address on destination chainId
+
+## Query Status of asD Transaction
+
+- users can look up the status of their transaction by using the `txHash` returned from the first deposit function
+
+## Failure states
+
+- will discuss reverting txs, and how to handle them with sdk
