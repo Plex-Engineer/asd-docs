@@ -21,11 +21,14 @@ Burn
 <CodeGroup>
 
 ```typescript Minting
-import { ASD } from "example-package";
+import { ASDToken } from "example-package";
 
-await ASD.mint({
+// initialize the token
+const asdToken = new ASDToken({ chainId: 7701, address: "0x0..." });
+
+const txHash = await asdToken.mint({
   amount: "example",
-  destinationChain: "example",
+  destinationChain: 1,
   slippage: "example",
 });
 ```

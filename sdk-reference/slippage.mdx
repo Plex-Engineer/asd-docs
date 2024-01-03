@@ -3,6 +3,28 @@ title: Slippage
 description: Math Behind calculating slippage
 ---
 
-Will discuss the math behind calculating slippage.
+When initially depositing a stablecoin (ex. USDC) into the asD contract, it is swapped for \$NOTE on the Canto Network DEX.
+This swap is subject to slippage, which is the difference between the expected price of a trade and the price at which the trade is executed.
+The price of a trade is determined by the ratio of reserves in the pool and may not always be a 1:1 ratio of the two assets (stablecoin & \$NOTE).
 
-- USD -> NOTE -> ASD calculations
+### Calculating Expected asD
+
+The expected asD is calculated by estimating the amount of \$NOTE that will be received from the swap. CantoDex pairs have a function that returns the amount of \$NOTE that will be received from a swap of a given amount of stablecoin.
+This function is used to calculate the expected asD.
+
+```solidity
+function getAmountOut(uint amountIn, address tokenIn) external view returns (uint);
+```
+
+### SDK Usage
+
+The SDK has a function that can be used to calculate the expected asD given a stablecoin amount. This can be used to estimate the slippage value when depositing stablecoins into the asD contract.
+
+```typescript
+import { getExpectedAsD } from "sdk-example";
+
+const expectedAsD = await getExpectedAsD({
+  coin: { address: "0x...", amount: "" },
+  originChain: "ethereum",
+});
+```

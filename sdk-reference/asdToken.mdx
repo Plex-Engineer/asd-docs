@@ -1,0 +1,43 @@
+---
+title: asD Token
+description: asD Token Class
+---
+
+```typescript
+interface ASDToken {
+  chainId?: number;
+  address?: string;
+  name?: string;
+  symbol?: string;
+  owner?: string;
+
+  constructor(chainId: number, address: string): void;
+
+  deploy(props: {
+    name: string;
+    symbol: string;
+    owner: string;
+    csrRecipient: string;
+    chainId: number;
+    defaultAllowedChains?: number[];
+  }): Promise<`0x${string}`>;
+
+  mintASD(props: {
+    originChain: number;
+    destinationChain: number;
+    stablecoin: {
+      address: string;
+      amount: string;
+    };
+  }): Promise<`0x${string}`>;
+
+  burnASD(props: {
+    originChain: number;
+    destinationChain: number;
+    stablecoin: {
+      address: string;
+      amount: string;
+    };
+  }): Promise<`0x${string}`>;
+}
+```

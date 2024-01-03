@@ -85,6 +85,8 @@
       "group": "SDK Documentation",
       "pages": [
         "sdk-reference/overview",
+        "sdk-reference/asdToken",
+        "sdk-reference/deploying",
         "sdk-reference/transactions",
         "sdk-reference/balances",
         "sdk-reference/txStatus",

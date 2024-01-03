@@ -1,0 +1,34 @@
+---
+title: Deploying asD Token
+description: This page explains how to deploy asD Token
+---
+
+To deploy a new asD Token, you can initialize the ASDToken class from the SDK with no input parameters.
+When deploying the new token, you must specify the following parameters:
+
+- name: The name of the asD Token
+- symbol: The symbol of the asD Token
+- owner: The address of the owner of the asD Token
+- csrRecipient: The address of the CSR recipient
+- chainId: The chainId of the network where the asD Token will be deployed (cantoMainnet = 7700 or cantoTestnet = 7701)
+
+Optional Parameters:
+
+- allowed chains: allowed origin chains for stablecoins to swap to asD (default: 1 (eth-mainnet))
+
+```typescript
+import { ASDToken } from "sdk-example";
+
+const asdToken = new ASDToken();
+
+const tokenAddress = await asdToken.deploy({
+  name: "asD Token",
+  symbol: "asD",
+  owner: "0x0...",
+  csrRecipient: "0x0...",
+  chainId: 7701,
+  defaultAllowedChains: [1],
+});
+
+// tokenAddress and asdToken.address should be the same after deploying
+```
