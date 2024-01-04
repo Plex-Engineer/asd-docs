@@ -39,5 +39,9 @@ interface ASDToken {
       amount: string;
     };
   }): Promise<`0x${string}`>;
+
+  interestAccrued(): Promise<string>;
+  totalSupply(): Promise<string>;
+  cNoteBalance(): Promise<string>;
 }
 ```
