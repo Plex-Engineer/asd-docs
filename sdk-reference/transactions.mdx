@@ -3,18 +3,70 @@ title: Transactions
 description: "Generating Transactions For ASD"
 ---
 
-This page will walk through the process of generating transactions to mint and burn asd.
+## Mint
 
-Mint
+There are 2 types of ways to mint ASD:
 
-- Data for amount of USDC/USDT to deposit for minting.
-- Destination Chain.
-- Slippage Params
+#### Minting ASD with Stablecoin
 
-Burn
+- Stablecoin is deposited to contract on origin chain
+- Stablecoin is bridged to Canto network (through LayerZero) to be swapped for \$NOTE
+  - If origin chain is Canto, then the stablecoin will not be bridged
+- \$NOTE is deposited to the asD contract on the Canto Network
+- asD is minted and bridged back to the user on the destination chain (through LayerZero)
 
-- Burning ASD for USDC/USDT
-- Slippage Params
+#### Minting ASD with NOTE
+
+- \$NOTE is deposited to the asD contract on the Canto Network and user will receive asD on the Canto Network
+- There is no slippage associated with this since \$NOTE to asD is always 1:1
+
+#### Mint Params
+
+<CodeGroup>
+```typescript  Stablecoin
+interface MintWithStablecoinParams {
+  stablecoin: {
+    chainId: number; // chainId of the stablecoin and origin chain
+    address: string; // address of the stablecoin
+    amount: string; // amount of stablecoin to deposit
+  }
+  destinationChain: number; // chainId of the destination chain
+  minimumAsdOut: string; // minimum amount of asd to receive
+}
+```
+
+```typescript $NOTE
+interface MintWithNoteParams {
+  amount: string; // amount of $NOTE to deposit
+  destinationChain: number; // chainId of the destination chain
+}
+```
+
+</CodeGroup>
+
+## Burn
+
+You can burn asD to receive \$NOTE or stablecoin.
+
+#### Burning ASD
+
+- asD is bridged to the Canto Network (through LayerZero)
+- asD is burned on the Canto Network and \$NOTE is released from the asD contract
+- \$NOTE is swapped for the desired stablecoin and bridged to the destination chain (through LayerZero)
+
+#### Burn Params
+
+```typescript Burning asD
+interface BurnParams {
+  originChain: number; // chainId of the origin chain of asD
+  amount: string; // amount of asd to burn
+  stableCoinOut: {
+    chainId: number; // chainId of the stablecoin and destination chain
+    address: string; // address of the stablecoin (could be $NOTE itself)
+    minimumOut: string; // minimum amount of stablecoin to receive
+  };
+}
+```
 
 ## Usage
 
@@ -26,14 +78,37 @@ import { ASDToken } from "example-package";
 // initialize the token
 const asdToken = new ASDToken({ chainId: 7701, address: "0x0..." });
 
-const txHash = await asdToken.mint({
-  amount: "example",
-  destinationChain: 1,
-  slippage: "example",
+const mintWithStablecoinTxHash = await asdToken.mintWithStablecoin({
+  stablecoin: {
+    chainId: 1;
+    address: "0x....";
+    amount: "1000000";
+  }
+  destinationChain: 1;
+  minimumAsdOut: "1000000";
+});
+
+const mintWithNoteTxHash = await asdToken.mintWithNote({
+  amount: "1000000";
+  destinationChain: 1;
 });
 ```
 
 ```typescript Burning
+import { ASDToken } from "example-package";
+
+// initialize the token
+const asdToken = new ASDToken({ chainId: 7701, address: "0x0..." });
+
+const burnTxHash = await asdToken.burn({
+  originChain: 1;
+  amount: "1000000";
+  stableCoinOut: {
+    chainId: 1;
+    address: "0x....";
+    minimumOut: "1000000";
+  };
+});
 
 ```
 
