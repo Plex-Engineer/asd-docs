@@ -1,0 +1,200 @@
+---
+title: Deploy Your asD
+---
+
+## Setup
+
+clone [this repo](https://github.com/Plex-Engineer/ASD-V2/tree/main) to get all of the necessariy files for deployment
+
+```bash
+# clone the repo
+git clone https://github.com/Plex-Engineer/ASD-V2.git
+
+# install dependencies
+npm install
+
+# compile using hardhat
+npx hardhat compile
+```
+
+## Networks
+
+To deploy your asD, you will need to know which networks you want to deploy to. Enter the
+network information into the hardhat.config.js file so hardhat can connect to these networks.
+You will see other network configurations already provided.
+
+You also must enter the Layer Zero endpoint id and endpoint address in the contants/lzEndpoints.json file.
+
+<CodeGroup>
+```javascript hardhat.config.js
+ module.exports = {
+    networks: {
+        canto: {
+            url: "https://canto-rpc.ansybl.io/",
+            chainId: 7700,
+            accounts: [getAccount()],
+        },
+        // add other networks here
+    }
+ }
+```
+
+```json constants/lzEndpoints.json
+{
+  "canto": {
+    "endpoint": "0x1a44076050125825900e736c501f859c50fe728c",
+    "id": 30159
+  }
+  // add other networks here
+}
+```
+
+</CodeGroup>
+
+## Environment
+
+In order to deploy your asd you will a local signer to use for deployment. create an empty
+.env file in the root of the project and add the private key of the signer
+
+```bash .env
+    PRIVATE_KEY="YOUR_PRIVATE_KEY"
+```
+
+## Deploy
+
+Deloying your asd will require 3 steps.
+
+### 1. Deploy base asD on Canto
+
+This contract will be responsible for depositing note into the clm, minting cNote,
+and minting all asD token supply. asD contracts on other networks should not have the
+ability to mint new tokens.
+
+When deploying the base asD contract, you will need to pass in the name, symbol,
+Layer Zero endpoint, cNote address, and a csr Recipient for this asD token. Using the tasks provided,
+you only need to provide the name and symbol of the asD token. The Layer Zero endpoint and cNote address are inferred
+from the network you are deploying to, and the csr Recipient is the address of the signer (unless otherwise specified).
+
+Parameters:
+
+- `network` - the network you are deploying to
+- `name` - the name of the asD token
+- `symbol` - the symbol of the asD token
+- `csr-recipient` - the address of the csr recipient (optional)
+
+```bash
+# deploy with signer as csr recipient
+npx hardhat --network canto  deployASD --name "<ASD_NAME>" --symbol "<ASD_SYMBOL>"
+
+# deploy with custom csr recipient
+npx hardhat --network canto  deployASD --name "<ASD_NAME>" --symbol "<ASD_SYMBOL>" --csr-recipient "<CSR_RECIPIENT>"
+```
+
+Onced entered you will see this in your terminal
+
+```bash
+cNote address: 0xEe602429Ef7eCe0a13e4FfE8dBC16e101049504C
+Deploying ASD OFT with "<LOCAL_SIGNER_ADDRESS>" on canto...
+Params:
+ name: "<ASD_NAME>"
+ symbol: "<ASD_SYMBOL>"
+ lzEndpoint: 0x1a44076050125825900e736c501f859c50fe728c
+ cNote: 0xEe602429Ef7eCe0a13e4FfE8dBC16e101049504C
+ csrRecipient: "<LOCAL_SIGNER_ADDRESS or CSR_RECIPIENT>"
+
+ Proceed with deployment? y/N:
+```
+
+Review the parameters and if they are correct, type `y` and press enter to deploy the asD contract.
+
+```bash
+ASD OFT deployed to: "0x<ASD_ADDRESS>"
+```
+
+### 2. Deploy asD contracts on remote networks
+
+No matter where your base application lives, all other asD tokens you deploy will be
+regular OFT tokens. This means that they will not have the ability to mint new tokens and are
+only responsible for managing balances and transfers.
+
+To deploy the asD OFT contracts on other networks, you will need to pass in the name, symbol,
+lzEndpoint, and the delegate owner of the contract. Once again, the lzEndpoint can be inferred by the
+network you are deploying to.
+
+The deployOFT task will allow you to do this by passing in these parameters:
+
+- `network` - the network you are deploying to
+- `name` - the name of the asD token
+- `symbol` - the symbol of the asD token
+- `delegate` - the address of the delegate owner of the contract (optional)
+
+```bash
+# deploy with signer as delegate owner
+npx hardhat --network canto  deployOFT --name "<ASD_NAME>" --symbol "<ASD_SYMBOL>"
+
+# deploy with custom delegate owner
+npx hardhat --network canto  deployOFT --name "<ASD_NAME>" --symbol "<ASD_SYMBOL>" --delegate "<DELEGATE_OWNER>"
+```
+
+Onced entered you will see this in your terminal
+
+```bash
+Deploying OFT with "<LOCAL_SIGNER_ADDRESS>" on "<CHAIN>"...
+Params:
+ name: "<ASD_NAME>"
+ symbol: "<ASD_SYMBOL>"
+ delegate: "<LOCAL_SIGNER_ADDRESS or DELEGATE_OWNER>"
+
+Proceed with deployment? y/N:
+```
+
+Review the parameters and if they are correct, type `y` and press enter to deploy the asD contract.
+
+```bash
+OFT deployed to: "0x<ASD_ADDRESS>"
+```
+
+### 3. Set Trusted Peers
+
+To allow the asD contracts to interact with each other (send and receive tokens), each
+contract will need to trust the other contracts on the remote networks. This is a two way trust
+system, for example if you deploy on Canto and Ethereum, the canto contract must trust the Ethereum
+contract and the Ethereum contract must trust the Canto contract. This is done by calling `setPeer` on
+the OFT.
+
+The setPeer task in the tasks folder will allow you to do this by just passing in these parameters
+
+- `network` - the local network of the contract
+- `local-contract` - the address of the local contract
+- `remote-chain` - the remote network of the contract
+- `remote-contract` - the address of the remote contract
+
+```bash
+npx hardhat --network canto setPeer --local-contract "<LOCAL_CONTRACT_ADDRESS>" --remote-chain "<REMOTE_CHAIN>" --remote-contract "<REMOTE_CONTRACT_ADDRESS>"
+```
+
+#### Check Peers
+
+To check if the peers are set correctly, you can call the `checkPeer` task in the tasks folder.
+Inside this file, list all of the addresses of the networks you want to check.
+
+```javascript tasks/oft/checkPeers.js
+const remoteAddresses = {
+  canto: "0x....",
+  ethereum: "0x...",
+  // add other networks here
+};
+```
+
+Once the addresses are set use the script to check the peers
+
+```bash
+npx hardhat --network canto checkPeers
+```
+
+An example return is shown here on testnet
+
+```bash
+[mumbai]: ✅
+[fantom-testnet]: ✅
+```

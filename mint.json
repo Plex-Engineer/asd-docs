@@ -82,6 +82,12 @@
       ]
     },
     {
+      "group": "Deployments",
+      "pages": [
+        "deployContracts/deployASDOFT"
+      ]
+    },
+    {
       "group": "SDK Documentation",
       "pages": [
         "sdk-reference/overview",
